@@ -3,13 +3,13 @@
 
 # Configurables.
 
-set(NGX_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE STRING "nginx install prefix")
-set(NGX_SBIN_PATH       "sbin/nginx"      CACHE STRING "")
-set(NGX_MODULES_PATH    "modules"         CACHE STRING "")
-set(NGX_CONF_PATH       "conf/nginx.conf" CACHE STRING "")
-set(NGX_ERROR_LOG_PATH  "logs/error.log"  CACHE STRING "")
-set(NGX_PID_PATH        "logs/nginx.pid"  CACHE STRING "")
-set(NGX_LOCK_PATH       "logs/nginx.lock" CACHE STRING "")
+set(NGX_PREFIX "${CMAKE_INSTALL_PREFIX}"  CACHE STRING "nginx install prefix")
+set(NGX_SBIN_PATH       "${NGX_PREFIX}/bin/nginx"       CACHE STRING "")
+set(NGX_MODULES_PATH    "${NGX_PREFIX}/modules"         CACHE STRING "")
+set(NGX_CONF_PATH       "${NGX_PREFIX}/conf/nginx.conf" CACHE STRING "")
+set(NGX_ERROR_LOG_PATH  "${NGX_PREFIX}/logs/error.log"  CACHE STRING "")
+set(NGX_PID_PATH        "${NGX_PREFIX}/logs/nginx.pid"  CACHE STRING "")
+set(NGX_LOCK_PATH       "${NGX_PREFIX}/logs/nginx.lock" CACHE STRING "")
 set(NGX_USER            "nobody"          CACHE STRING "nginx user")
 set(NGX_GROUP           "nogroup"         CACHE STRING "nginx group")
 set(NGX_PLATFORM "" CACHE STRING "NGX platform to build for")
@@ -21,12 +21,12 @@ set(USE_THREADS "NO")
 set(NGX_FILE_AIO "NO")
 set(HTTP "YES")
 set(HTTP_CACHE "YES")
-set(NGX_HTTP_LOG_PATH           "logs/access.log"   CACHE STRING "")
-set(NGX_HTTP_CLIENT_TEMP_PATH   "client_body_temp"  CACHE STRING "")
-set(NGX_HTTP_PROXY_TEMP_PATH    "proxy_temp"        CACHE STRING "")
-set(NGX_HTTP_FASTCGI_TEMP_PATH  "fastcgi_temp"      CACHE STRING "")
-set(NGX_HTTP_UWSGI_TEMP_PATH    "uwsgi_temp"        CACHE STRING "")
-set(NGX_HTTP_SCGI_TEMP_PATH     "scgi_temp"         CACHE STRING "")
+set(NGX_HTTP_LOG_PATH          "logs/access.log"  CACHE STRING "")
+set(NGX_HTTP_CLIENT_TEMP_PATH  "temp/client_body" CACHE STRING "")
+set(NGX_HTTP_PROXY_TEMP_PATH   "temp/proxy"       CACHE STRING "")
+set(NGX_HTTP_FASTCGI_TEMP_PATH "temp/fastcgi"     CACHE STRING "")
+set(NGX_HTTP_UWSGI_TEMP_PATH   "temp/uwsgi"       CACHE STRING "")
+set(NGX_HTTP_SCGI_TEMP_PATH    "temp/scgi"        CACHE STRING "")
 set(HTTP_SSL "NO")
 set(HTTP_V2 "NO")
 set(HTTP_REALIP "NO")
@@ -1133,6 +1133,9 @@ function(ngx_types_sizeof ngx_type)
     set(STATUS_PREFIX "checking for ${ngx_type} ...")
 
     set(CMAKE_EXTRA_INCLUDE_FILES "signal.h")
+
+    # be quiet
+    set(CMAKE_REQUIRED_QUIET "YES")
 
     # some internal knowledge to make function work multiple times
     unset(AA)
@@ -2834,7 +2837,7 @@ link_directories(${REQ_LIBRARY_DIRS})
 
 # ngx: back to configure script
 
-ngx_define("NGX_PREFIX"         "\"${NGX_PREFIX}\"")
+ngx_define("NGX_PREFIX"         "\"${NGX_PREFIX}/\"")
 ngx_define("NGX_CONF_PREFIX"    "\"${NGX_CONF_PREFIX}/\"")
 
 ngx_define("NGX_SBIN_PATH"      "\"${NGX_SBIN_PATH}\"")
@@ -2898,8 +2901,6 @@ target_link_libraries(nginx
 
 # TODO: dynamic modules
 
-install(TARGETS nginx DESTINATION "${NGX_PREFIX}/sbin")
-
 # ngx: auto/stubs script
 
 ngx_have("NGX_SUPPRESS_WARN")
@@ -2913,3 +2914,16 @@ ngx_define("NGX_GROUP" "\"${NGX_GROUP}\"")
 if (NOT "x${NGX_BUILD}" STREQUAL "x")
     ngx_define("NGX_BUILD" "\"${NGX_BUILD}\"")
 endif()
+
+# installation
+
+install(TARGETS nginx DESTINATION "${NGX_PREFIX}/bin")
+
+get_filename_component(NGX_HTTP_LOG_DIR "${NGX_HTTP_LOG_PATH}" DIRECTORY)
+install(DIRECTORY DESTINATION "${NGX_HTTP_LOG_DIR}")
+
+install(DIRECTORY DESTINATION "${NGX_HTTP_CLIENT_TEMP_PATH}")
+install(DIRECTORY DESTINATION "${NGX_HTTP_PROXY_TEMP_PATH}")
+install(DIRECTORY DESTINATION "${NGX_HTTP_FASTCGI_TEMP_PATH}")
+install(DIRECTORY DESTINATION "${NGX_HTTP_UWSGI_TEMP_PATH}")
+install(DIRECTORY DESTINATION "${NGX_HTTP_SCGI_TEMP_PATH}")
