@@ -349,20 +349,75 @@ function(ngx_check_feature)
     unset(ngx_found)
     unset(ngx_found CACHE)
     unset(ngx_found PARENT_SCOPE)
+
     if ("${ngx_feature_run}" STREQUAL "yes")
         CHECK_C_SOURCE_RUNS("${A}" ngx_found)
-    elseif("${ngx_feature_run}" STREQUAL "no")
+
+    elseif ("${ngx_feature_run}" STREQUAL "no")
         CHECK_C_SOURCE_COMPILES("${A}" ngx_found)
+
+    elseif ("${ngx_feature_run}" STREQUAL "value")
+        set(MACRO_CHECK_FUNCTION_DEFINITIONS
+            "-Dngx_found ${CMAKE_REQUIRED_FLAGS}")
+
+        # prepare link directories list
+        if (CMAKE_REQUIRED_LIBRARIES)
+            set(CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES
+                LINK_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
+        else()
+            set(CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES)
+        endif()
+
+        if (CMAKE_REQUIRED_INCLUDES)
+            set(CHECK_C_SOURCE_COMPILES_ADD_INCLUDES
+                "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}")
+        else()
+            set(CHECK_C_SOURCE_COMPILES_ADD_INCLUDES)
+        endif()
+
+        set(tmp_src_name
+            "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c")
+        file(WRITE "${tmp_src_name}" "${A}\n")
+
+        try_run(ngx_found_EXITCODE ngx_found_COMPILED
+                "${CMAKE_BINARY_DIR}"
+                "${tmp_src_name}"
+                COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
+                ${CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES}
+                CMAKE_FLAGS
+                -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
+                -DCMAKE_SKIP_RPATH:BOOL=${CMAKE_SKIP_RPATH}
+                "${CHECK_C_SOURCE_COMPILES_ADD_INCLUDES}"
+                COMPILE_OUTPUT_VARIABLE OUTPUT
+                RUN_OUTPUT_VARIABLE RUN_OUTPUT)
+
+        # if it did not compile make the return value fail code of 1
+        if (NOT ngx_found_COMPILED)
+            set(ngx_found_EXITCODE 1)
+        endif()
+
+        if ("${ngx_found_EXITCODE}" EQUAL 0)
+            set(ngx_found 1 CACHE INTERNAL "Test ngx_found")
+        else()
+            set(ngx_found "" CACHE INTERNAL "Test ngx_found")
+        endif()
+
     else()
-        message(FATAL_ERROR "ngx_feature_run should be 'yes' or 'no'")
+        message(FATAL_ERROR "ngx_feature_run should be 'yes', 'no', or 'value'")
         # do nothing
     endif()
 
     if (ngx_found EQUAL 1)
         set(ngx_found "yes" PARENT_SCOPE)
-        message(STATUS "ngx: checking for ${ngx_feature} ... found")
-        if (NOT "${ngx_feature_name}" STREQUAL "")
-            ngx_have("${ngx_feature_name}")
+
+        if ("${ngx_feature_run}" STREQUAL "value")
+            message(STATUS "ngx: checking for ${ngx_feature} ... ${RUN_OUTPUT}")
+            ngx_define("${ngx_feature_name}" "${RUN_OUTPUT}")
+        else()
+            message(STATUS "ngx: checking for ${ngx_feature} ... found")
+            if (NOT "${ngx_feature_name}" STREQUAL "")
+                ngx_have("${ngx_feature_name}")
+            endif()
         endif()
 
     else()
@@ -1268,8 +1323,16 @@ set(ngx_feature_test
 ngx_check_feature()
 
 
-# use sys_nerr in runtime, since it's harder to implement "value" type check
-ngx_define("NGX_SYS_NERR" "sys_nerr")
+set(ngx_feature "sys_nerr")
+set(ngx_feature_name "NGX_SYS_NERR")
+set(ngx_feature_run "value")
+set(ngx_feature_incs
+    "#include <errno.h>"
+    "#include <stdio.h>")
+set(ngx_feature_path "")
+set(ngx_feature_libs "")
+set(ngx_feature_test "printf(\"%d\", sys_nerr)\;")
+ngx_check_feature()
 
 
 set(ngx_feature "localtime_r()")
