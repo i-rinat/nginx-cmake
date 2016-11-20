@@ -254,7 +254,7 @@ file(WRITE "${NGX_AUTO_CONFIG_H_NAME}" "")
 file(WRITE "${NGX_AUTO_HEADERS_H_NAME}" "\n")
 file(WRITE "${NGX_MODULES_C_NAME}" "")
 
-function(ngx_have option_name)
+function(ngx_auto_have option_name)
     set(A "\n")
     set(A "${A}#ifndef ${option_name}\n")
     set(A "${A}#define ${option_name}  1\n")
@@ -262,7 +262,7 @@ function(ngx_have option_name)
     file(APPEND "${NGX_AUTO_CONFIG_H_NAME}" "${A}")
 endfunction()
 
-function(ngx_define option_name option_value)
+function(ngx_auto_define option_name option_value)
     set(A "\n")
     set(A "${A}#ifndef ${option_name}\n")
     set(A "${A}#define ${option_name}  ${option_value}\n")
@@ -270,7 +270,7 @@ function(ngx_define option_name option_value)
     file(APPEND "${NGX_AUTO_CONFIG_H_NAME}" "${A}")
 endfunction()
 
-function(ngx_have_headers option_name)
+function(ngx_auto_have_headers option_name)
     set(A "\n")
     set(A "${A}#ifndef ${option_name}\n")
     set(A "${A}#define ${option_name}  1\n")
@@ -285,7 +285,7 @@ endfunction()
 ngx_append_auto_config("#define NGX_CONFIGURE \"${NGX_CONFIGURE}\"")
 
 if (NGX_DEBUG STREQUAL "YES")
-    ngx_have("NGX_DEBUG")
+    ngx_auto_have("NGX_DEBUG")
 endif()
 
 if (NGX_PLATFORM STREQUAL "")
@@ -311,9 +311,9 @@ else()
     message(STATUS "ngx: building for ${NGX_PLATFORM}")
 endif()
 
-ngx_define("NGX_COMPILER" "\"unknown\"")
+ngx_auto_define("NGX_COMPILER" "\"unknown\"")
 
-function(ngx_check_feature)
+function(ngx_auto_feature)
     if (NOT ngx_feature_name STREQUAL "")
         string(TOUPPER ngx_feature_name ngx_have_feature)
     endif()
@@ -412,11 +412,11 @@ function(ngx_check_feature)
 
         if ("${ngx_feature_run}" STREQUAL "value")
             message(STATUS "ngx: checking for ${ngx_feature} ... ${RUN_OUTPUT}")
-            ngx_define("${ngx_feature_name}" "${RUN_OUTPUT}")
+            ngx_auto_define("${ngx_feature_name}" "${RUN_OUTPUT}")
         else()
             message(STATUS "ngx: checking for ${ngx_feature} ... found")
             if (NOT "${ngx_feature_name}" STREQUAL "")
-                ngx_have("${ngx_feature_name}")
+                ngx_auto_have("${ngx_feature_name}")
             endif()
         endif()
 
@@ -437,7 +437,7 @@ set(ngx_feature_incs "")
 set(ngx_feature_path "")
 set(ngx_feature_libs "-Wl,-E")
 set(ngx_feature_test "")
-ngx_check_feature()
+ngx_auto_feature()
 if (${ngx_found} STREQUAL "yes")
     set(MAIN_LINK "-Wl,-E")
 endif()
@@ -458,7 +458,7 @@ set(ngx_feature_test
     "if (n != 2)"
     "    return 1\;"
     "__sync_synchronize()\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "C99 variadic macros")
@@ -473,7 +473,7 @@ set(ngx_feature_test
     "char  buf[30]\; buf[0] = '0'\;"
     "var(0, buf, \"%d\", 1)\;"
     "if (buf[0] != '1') return 1")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "gcc variadic macros")
@@ -488,7 +488,7 @@ set(ngx_feature_test
     "char  buf[30]\; buf[0] = '0'\;"
     "var(0, buf, \"%d\", 1)\;"
     "if (buf[0] != '1') return 1")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "gcc builtin 64 bit byteswap")
@@ -498,11 +498,11 @@ set(ngx_feature_incs "")
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "if (__builtin_bswap64(0)) return 1")
-ngx_check_feature()
+ngx_auto_feature()
 
 # ngx: auto/headers script
 
-function(ngx_check_include ngx_include)
+function(ngx_auto_check_include ngx_include)
     unset(ngx_found)
     unset(ngx_found CACHE)
     unset(ngx_found PARENT_SCOPE)
@@ -524,7 +524,7 @@ function(ngx_check_include ngx_include)
         string(REPLACE "." "_" tmp3 "${tmp2}")
         set(ngx_name "${tmp3}")
 
-        ngx_have_headers("NGX_HAVE_${ngx_name}")
+        ngx_auto_have_headers("NGX_HAVE_${ngx_name}")
 
         set(NGX_INCLUDE_${ngx_name} "#include <${ngx_include}>\n" PARENT_SCOPE)
 
@@ -534,20 +534,20 @@ function(ngx_check_include ngx_include)
 
 endfunction()
 
-ngx_check_include("unistd.h")
-ngx_check_include("inttypes.h")
-ngx_check_include("limits.h")
-ngx_check_include("sys/filio.h")
-ngx_check_include("sys/param.h")
-ngx_check_include("sys/mount.h")
-ngx_check_include("sys/statvfs.h")
-ngx_check_include("crypt.h")
+ngx_auto_check_include("unistd.h")
+ngx_auto_check_include("inttypes.h")
+ngx_auto_check_include("limits.h")
+ngx_auto_check_include("sys/filio.h")
+ngx_auto_check_include("sys/param.h")
+ngx_auto_check_include("sys/mount.h")
+ngx_auto_check_include("sys/statvfs.h")
+ngx_auto_check_include("crypt.h")
 
 # ngx: auto/os/conf with immediately auto/os/linux script
 
 add_definitions(-D_GNU_SOURCE -D_FILE_OFFSET_BITS=64)
 set(CMAKE_REQUIRED_DEFINITIONS "-D_GNU_SOURCE -D_FILE_OFFSET_BITS=64")
-ngx_have_headers("NGX_LINUX")
+ngx_auto_have_headers("NGX_LINUX")
 
 set(CORE_SRCS ${UNIX_SRCS} ${LINUX_SRCS})
 
@@ -571,10 +571,10 @@ set(ngx_feature_test
     "(void) ee\;"
     "efd = epoll_create(100)\;"
     "if (efd == -1) return 1\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 if ("${ngx_found}" STREQUAL "yes")
-    ngx_have("NGX_HAVE_CLEAR_EVENT")
+    ngx_auto_have("NGX_HAVE_CLEAR_EVENT")
     set(CORE_SRCS ${CORE_SRCS} ${EPOLL_SRCS})
     set(EVENT_MODULES ${EVENT_MODULES} ${EPOLL_MODULE})
     set(EVENT_FOUND "YES")
@@ -592,7 +592,7 @@ if ("${ngx_found}" STREQUAL "yes")
         "ee.events = EPOLLIN|EPOLLRDHUP|EPOLLET\;"
         "ee.data.ptr = NULL\;"
         "epoll_ctl(efd, EPOLL_CTL_ADD, fd, &ee)")
-    ngx_check_feature()
+    ngx_auto_feature()
 
     # EPOLLEXCLUSIVE appeared in Linux 4.5, glibc 2.24
     set(ngx_feature "EPOLLEXCLUSIVE")
@@ -607,7 +607,7 @@ if ("${ngx_found}" STREQUAL "yes")
         "ee.events = EPOLLIN|EPOLLEXCLUSIVE\;"
         "ee.data.ptr = NULL\;"
         "epoll_ctl(efd, EPOLL_CTL_ADD, fd, &ee)")
-    ngx_check_feature()
+    ngx_auto_feature()
 endif()
 
 # O_PATH and AT_EMPTY_PATH were introduced in 2.6.39, glibc 2.14
@@ -624,7 +624,7 @@ set(ngx_feature_test
     "int fd\; struct stat sb\;"
     "fd = openat(AT_FDCWD, \".\", O_PATH|O_DIRECTORY|O_NOFOLLOW)\;"
     "if (fstatat(fd, \"\", &sb, AT_EMPTY_PATH) != 0) return 1")
-ngx_check_feature()
+ngx_auto_feature()
 
 # sendfile()
 set(ngx_feature "sendfile()")
@@ -640,7 +640,7 @@ set(ngx_feature_test
     "ssize_t n\; off_t off = 0\;"
     "n = sendfile(s, fd, &off, 1)\;"
     "if (n == -1 && errno == ENOSYS) return 1")
-ngx_check_feature()
+ngx_auto_feature()
 
 if ("${ngx_found}" STREQUAL "yes")
     set(CORE_SRCS ${CORE_SRCS} ${LINUX_SENDFILE_SRCS})
@@ -661,10 +661,10 @@ set(ngx_feature_test
     "ssize_t n\; off_t off = 0\;"
     "n = sendfile(s, fd, &off, 1)\;"
     "if (n == -1 && errno == ENOSYS) return 1")
-ngx_check_feature()
+ngx_auto_feature()
 
 
-ngx_check_include("sys/prctl.h")
+ngx_auto_check_include("sys/prctl.h")
 
 
 # prctl(PR_SET_DUMPABLE)
@@ -675,7 +675,7 @@ set(ngx_feature_incs "#include <sys/prctl.h>")
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "if (prctl(PR_SET_DUMPABLE, 1, 0, 0, 0) == -1) return 1")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 # sched_setaffinity()
@@ -689,7 +689,7 @@ set(ngx_feature_test
     "cpu_set_t mask\;"
     "CPU_ZERO(&mask)\;"
     "sched_setaffinity(0, sizeof(cpu_set_t), &mask)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 # crypt_r()
@@ -702,19 +702,19 @@ set(ngx_feature_libs "-lcrypt")
 set(ngx_feature_test
     "struct crypt_data  cd\;"
     "crypt_r(\"key\", \"salt\", &cd)\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
-ngx_check_include("sys/vfs.h")
+ngx_auto_check_include("sys/vfs.h")
 
 # ngx: back to auto/os/conf script
 
 # XXX: targeting x86 which have nonaligned access
-ngx_have("NGX_HAVE_NONALIGNED")
+ngx_auto_have("NGX_HAVE_NONALIGNED")
 
 # XXX: NGX_CPU_CACHE_LINE is hardcoded to 64
 set(NGX_CPU_CACHE_LINE 64)
-ngx_define("NGX_CPU_CACHE_LINE" "${NGX_CPU_CACHE_LINE}")
+ngx_auto_define("NGX_CPU_CACHE_LINE" "${NGX_CPU_CACHE_LINE}")
 
 # ngx: auto/unix script
 
@@ -731,7 +731,7 @@ set(ngx_feature_test
     "pl.revents = 0\;"
     "n = poll(&pl, 1, 0)\;"
     "if (n == -1) return 1")
-ngx_check_feature()
+ngx_auto_feature()
 
 if ("${ngx_found}" STREQUAL "no")
     set(EVENT_POLL "NONE")
@@ -747,7 +747,7 @@ set(ngx_feature_incs "")
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "crypt(\"test\", \"salt\")\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 if ("${ngx_found}" STREQUAL "no")
@@ -757,7 +757,7 @@ if ("${ngx_found}" STREQUAL "no")
     set(ngx_feature_incs "")
     set(ngx_feature_path "")
     set(ngx_feature_libs "-lcrypt")
-    ngx_check_feature()
+    ngx_auto_feature()
 
     if ("${ngx_found}" STREQUAL "yes")
         set(CRYPT_LIB "-lcrypt")
@@ -772,7 +772,7 @@ set(ngx_feature_incs "#include <fcntl.h>")
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "fcntl(0, F_READAHEAD, 1)\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "posix_fadvise()")
@@ -782,7 +782,7 @@ set(ngx_feature_incs "#include <fcntl.h>")
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "posix_fadvise(0, 0, 0, POSIX_FADV_SEQUENTIAL)\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "O_DIRECT")
@@ -792,11 +792,11 @@ set(ngx_feature_incs "#include <fcntl.h>")
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "fcntl(0, F_SETFL, O_DIRECT)\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 if ("${ngx_found}" STREQUAL "yes") # and system is Linux
-    ngx_have("NGX_HAVE_ALIGNED_DIRECTIO")
+    ngx_auto_have("NGX_HAVE_ALIGNED_DIRECTIO")
 endif()
 
 set(ngx_feature "F_NOCACHE")
@@ -806,7 +806,7 @@ set(ngx_feature_incs "#include <fcntl.h>")
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "fcntl(0, F_NOCACHE, 1)\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "directio()")
@@ -818,7 +818,7 @@ set(ngx_feature_incs
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "directio(0, DIRECTIO_ON)\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "statfs()")
@@ -833,7 +833,7 @@ set(ngx_feature_libs "")
 set(ngx_feature_test
     "struct statfs  fs\;"
     "statfs(\".\", &fs)\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "statvfs()")
@@ -847,7 +847,7 @@ set(ngx_feature_libs "")
 set(ngx_feature_test
     "struct statvfs  fs\;"
     "statvfs(\".\", &fs)\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "dlopen()")
@@ -858,13 +858,13 @@ set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test
     "dlopen(NULL, RTLD_NOW | RTLD_GLOBAL)\; dlsym(NULL, \"\")")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 if ("${ngx_found}" STREQUAL "no")
     set(ngx_feature "dlopen() in libdl")
     set(ngx_feature_libs "-ldl")
-    ngx_check_feature()
+    ngx_auto_feature()
 
     if ("${ngx_found}" STREQUAL "yes")
         set(CORE_LIBS ${CORE_LIBS} "-ldl")
@@ -880,13 +880,13 @@ set(ngx_feature_incs "#include <sched.h>")
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "sched_yield()")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 if ("${ngx_found}" STREQUAL "no")
     set(ngx_feature "sched_yield() in librt")
     set(ngx_feature_libs "-lrt")
-    ngx_check_feature()
+    ngx_auto_feature()
 
     if ("${ngx_found}" STREQUAL "yes")
         set(CORE_LIBS ${CORE_LIBS} -lrt)
@@ -901,7 +901,7 @@ set(ngx_feature_incs "#include <sys/socket.h>")
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "setsockopt(0, SOL_SOCKET, SO_SETFIB, NULL, 0)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "SO_REUSEPORT")
@@ -911,7 +911,7 @@ set(ngx_feature_incs "#include <sys/socket.h>")
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "setsockopt(0, SOL_SOCKET, SO_REUSEPORT, NULL, 0)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "SO_ACCEPTFILTER")
@@ -921,7 +921,7 @@ set(ngx_feature_incs "#include <sys/socket.h>")
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "setsockopt(0, SOL_SOCKET, SO_ACCEPTFILTER, NULL, 0)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 # NetBSD bind to any address for transparent proxying
@@ -932,7 +932,7 @@ set(ngx_feature_incs "#include <sys/socket.h>")
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "setsockopt(0, SOL_SOCKET, SO_BINDANY, NULL, 0)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 # Linux IP_BIND_ADDRESS_NO_PORT
@@ -946,7 +946,7 @@ set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test
     "setsockopt(0, IPPROTO_IP, IP_BIND_ADDRESS_NO_PORT, NULL, 0)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 # Linux transparent proxying
@@ -959,7 +959,7 @@ set(ngx_feature_incs
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "setsockopt(0, IPPROTO_IP, IP_TRANSPARENT, NULL, 0)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 # FreeBSD bind to any address for transparent proxying
@@ -972,7 +972,7 @@ set(ngx_feature_incs
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "setsockopt(0, IPPROTO_IP, IP_BINDANY, NULL, 0)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 # BSD way to get IPv4 datagram destination address
@@ -985,7 +985,7 @@ set(ngx_feature_incs
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "setsockopt(0, IPPROTO_IP, IP_RECVDSTADDR, NULL, 0)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 # Linux way to get IPv4 datagram destination address
@@ -998,7 +998,7 @@ set(ngx_feature_incs
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "setsockopt(0, IPPROTO_IP, IP_PKTINFO, NULL, 0)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 # RFC 3542 way to get IPv6 datagram destination address
@@ -1011,7 +1011,7 @@ set(ngx_feature_incs
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "setsockopt(0, IPPROTO_IPV6, IPV6_RECVPKTINFO, NULL, 0)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "TCP_DEFER_ACCEPT")
@@ -1024,7 +1024,7 @@ set(ngx_feature_incs
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "setsockopt(0, IPPROTO_TCP, TCP_DEFER_ACCEPT, NULL, 0)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "TCP_KEEPIDLE")
@@ -1040,7 +1040,7 @@ set(ngx_feature_test
     "setsockopt(0, IPPROTO_TCP, TCP_KEEPIDLE, NULL, 0)\;"
     "setsockopt(0, IPPROTO_TCP, TCP_KEEPINTVL, NULL, 0)\;"
     "setsockopt(0, IPPROTO_TCP, TCP_KEEPCNT, NULL, 0)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "TCP_FASTOPEN")
@@ -1053,7 +1053,7 @@ set(ngx_feature_incs
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "setsockopt(0, IPPROTO_TCP, TCP_FASTOPEN, NULL, 0)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "TCP_INFO")
@@ -1073,7 +1073,7 @@ set(ngx_feature_test
     "ti.tcpi_snd_cwnd = 0\;"
     "ti.tcpi_rcv_space = 0\;"
     "getsockopt(0, IPPROTO_TCP, TCP_INFO, &ti, &optlen)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "accept4()")
@@ -1083,7 +1083,7 @@ set(ngx_feature_incs "#include <sys/socket.h>")
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "accept4(0, NULL, NULL, SOCK_NONBLOCK)")
-ngx_check_feature()
+ngx_auto_feature()
 
 if ("${NGX_FILE_AIO}" STREQUAL "YES")
 
@@ -1097,7 +1097,7 @@ if ("${NGX_FILE_AIO}" STREQUAL "YES")
         "struct aiocb  iocb\;"
         "iocb.aio_sigevent.sigev_notify = SIGEV_KEVENT\;"
         "(void) aio_read(&iocb)")
-    ngx_check_feature()
+    ngx_auto_feature()
 
     if ("${ngx_found}" STREQUAL "yes")
         set(CORE_SRCS ${CORE_SRCS} ${FILE_AIO_SRCS})
@@ -1119,11 +1119,11 @@ if ("${NGX_FILE_AIO}" STREQUAL "YES")
             "iocb.aio_resfd = -1\;"
             "(void) iocb\;"
             "(void) eventfd(0, 0)")
-        ngx_check_feature()
+        ngx_auto_feature()
 
         if ("${ngx_found}" STREQUAL "yes")
-            ngx_have("NGX_HAVE_EVENTFD")
-            ngx_have("NGX_HAVE_SYS_EVENTFD_H")
+            ngx_auto_have("NGX_HAVE_EVENTFD")
+            ngx_auto_have("NGX_HAVE_SYS_EVENTFD_H")
             set(CORE_SRCS ${CORE_SRCS} ${LINUX_AIO_SRCS})
         endif()
     endif()
@@ -1140,10 +1140,10 @@ if ("${NGX_FILE_AIO}" STREQUAL "YES")
             "iocb.aio_resfd = -1\;"
             "(void) iocb\;"
             "(void) SYS_eventfd")
-        ngx_check_feature()
+        ngx_auto_feature()
 
         if ("${ngx_found}" STREQUAL "yes")
-            ngx_have("NGX_HAVE_EVENTFD")
+            ngx_auto_have("NGX_HAVE_EVENTFD")
             set(CORE_SRCS ${CORE_SRCS} $PLINUX_AIO_SRCS})
         endif()
     endif()
@@ -1162,29 +1162,29 @@ else()
     set(ngx_feature_path "")
     set(ngx_feature_libs "")
     set(ngx_feature_test "(void) eventfd(0, 0)")
-    ngx_check_feature()
+    ngx_auto_feature()
 
     if ("${ngx_found}" STREQUAL "yes")
-        ngx_have("NGX_HAVE_SYS_EVENTFD_H")
+        ngx_auto_have("NGX_HAVE_SYS_EVENTFD_H")
     endif()
 
     if ("${ngx_found}" STREQUAL "no")
         set(ngx_feature "eventfd() (SYS_eventfd)")
         set(ngx_feature_incs "#include <sys/syscall.h>")
         set(ngx_feature_test "(void) SYS_eventfd")
-        ngx_check_feature()
+        ngx_auto_feature()
     endif()
 endif()
 
 
-ngx_have("NGX_HAVE_UNIX_DOMAIN")
+ngx_auto_have("NGX_HAVE_UNIX_DOMAIN")
 
 set(ngx_feature_libs "")
 
 
 # C types
 
-function(ngx_types_sizeof ngx_type)
+function(ngx_auto_types_sizeof ngx_type)
     set(STATUS_PREFIX "checking for ${ngx_type} ...")
 
     set(CMAKE_EXTRA_INCLUDE_FILES "signal.h")
@@ -1220,40 +1220,40 @@ function(ngx_types_sizeof ngx_type)
 endfunction()
 
 
-ngx_types_sizeof("int")
+ngx_auto_types_sizeof("int")
 
-ngx_types_sizeof("long")
+ngx_auto_types_sizeof("long")
 
-ngx_types_sizeof("long long")
+ngx_auto_types_sizeof("long long")
 
-ngx_types_sizeof("void *")
-ngx_define("NGX_PTR_SIZE" "${ngx_size}")
+ngx_auto_types_sizeof("void *")
+ngx_auto_define("NGX_PTR_SIZE" "${ngx_size}")
 
 # POSIX types
 set(NGX_INCLUDE_AUTO_CONFIG_H "#include \"ngx_auto_config.h\"")
 
-ngx_types_sizeof("sig_atomic_t")
-ngx_define("NGX_SIG_ATOMIC_T_SIZE" "${ngx_size}")
+ngx_auto_types_sizeof("sig_atomic_t")
+ngx_auto_define("NGX_SIG_ATOMIC_T_SIZE" "${ngx_size}")
 
 
 TEST_BIG_ENDIAN(SYSTEM_IS_BIG_ENDIAN)
 if (${SYSTEM_IS_BIG_ENDIAN} EQUAL 0)
-    ngx_have("NGX_HAVE_LITTLE_ENDIAN")
+    ngx_auto_have("NGX_HAVE_LITTLE_ENDIAN")
 endif()
 
 
-ngx_types_sizeof("size_t")
-ngx_define("NGX_MAX_SIZE_T_VALUE" "${ngx_max_value}")
-ngx_define("NGX_SIZE_T_LEN" "${ngx_max_len}")
+ngx_auto_types_sizeof("size_t")
+ngx_auto_define("NGX_MAX_SIZE_T_VALUE" "${ngx_max_value}")
+ngx_auto_define("NGX_SIZE_T_LEN" "${ngx_max_len}")
 
-ngx_types_sizeof("off_t")
-ngx_define("NGX_MAX_OFF_T_VALUE" "${ngx_max_value}")
-ngx_define("NGX_OFF_T_LEN" "${ngx_max_len}")
+ngx_auto_types_sizeof("off_t")
+ngx_auto_define("NGX_MAX_OFF_T_VALUE" "${ngx_max_value}")
+ngx_auto_define("NGX_OFF_T_LEN" "${ngx_max_len}")
 
-ngx_types_sizeof("time_t")
-ngx_define("NGX_TIME_T_SIZE" "${ngx_size}")
-ngx_define("NGX_TIME_T_LEN" "${ngx_max_len}")
-ngx_define("NGX_MAX_TIME_T_VALUE" "${ngx_max_value}")
+ngx_auto_types_sizeof("time_t")
+ngx_auto_define("NGX_TIME_T_SIZE" "${ngx_size}")
+ngx_auto_define("NGX_TIME_T_LEN" "${ngx_max_len}")
+ngx_auto_define("NGX_MAX_TIME_T_VALUE" "${ngx_max_value}")
 
 
 # syscalls, libc calls and some features
@@ -1270,7 +1270,7 @@ set(ngx_feature_test
     "struct sockaddr_in6  sin6\;"
     "sin6.sin6_family = AF_INET6\;"
     "(void) sin6")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "setproctitle()")
@@ -1280,7 +1280,7 @@ set(ngx_feature_incs "#include <stdlib.h>")
 set(ngx_feature_path "")
 set(ngx_feature_libs "${NGX_SETPROCTITLE_LIB}")
 set(ngx_feature_test "setproctitle(\"test\")\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "pread()")
@@ -1292,7 +1292,7 @@ set(ngx_feature_libs "")
 set(ngx_feature_test
     "char buf[1]\; ssize_t n\; n = pread(0, buf, 1, 0)\;"
     "if (n == -1) return 1")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "pwrite()")
@@ -1304,7 +1304,7 @@ set(ngx_feature_libs "")
 set(ngx_feature_test
     "char buf[1]\; ssize_t n\; n = pwrite(1, buf, 1, 0)\;"
     "if (n == -1) return 1")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 # pwritev() was introduced in FreeBSD 6 and Linux 2.6.30, glibc 2.10
@@ -1320,7 +1320,7 @@ set(ngx_feature_test
     "vec[0].iov_len = 1\;"
     "n = pwritev(1, vec, 1, 0)\;"
     "if (n == -1) return 1")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "sys_nerr")
@@ -1332,7 +1332,7 @@ set(ngx_feature_incs
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "printf(\"%d\", sys_nerr)\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "localtime_r()")
@@ -1342,7 +1342,7 @@ set(ngx_feature_incs "#include <time.h>")
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "struct tm t\; time_t c=0\; localtime_r(&c, &t)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "posix_memalign()")
@@ -1354,7 +1354,7 @@ set(ngx_feature_libs "")
 set(ngx_feature_test
     "void *p\; int n\; n = posix_memalign(&p, 4096, 4096)\;"
     "if (n != 0) return 1")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "memalign()")
@@ -1368,7 +1368,7 @@ set(ngx_feature_libs "")
 set(ngx_feature_test
     "void *p\; p = memalign(4096, 4096)\;"
     "if (p == NULL) return 1")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "mmap(MAP_ANON|MAP_SHARED)")
@@ -1382,7 +1382,7 @@ set(ngx_feature_test
     "p = mmap(NULL, 4096, PROT_READ|PROT_WRITE,"
     "         MAP_ANON|MAP_SHARED, -1, 0)\;"
     "if (p == MAP_FAILED) return 1\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "mmap(\"/dev/zero\", MAP_SHARED)")
@@ -1399,7 +1399,7 @@ set(ngx_feature_test
     "fd = open(\"/dev/zero\", O_RDWR)\;"
     "p = mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0)\;"
     "if (p == MAP_FAILED) return 1\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "System V shared memory")
@@ -1415,7 +1415,7 @@ set(ngx_feature_test
     "id = shmget(IPC_PRIVATE, 4096, (SHM_R|SHM_W|IPC_CREAT))\;"
     "if (id == -1) return 1\;"
     "shmctl(id, IPC_RMID, NULL)\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "POSIX semaphores")
@@ -1428,14 +1428,14 @@ set(ngx_feature_test
     "sem_t  sem\;"
     "if (sem_init(&sem, 1, 0) == -1) return 1\;"
     "sem_destroy(&sem)\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 if ("${ngx_found}" STREQUAL "no")
     # Linux has POSIX semaphores in libpthread
     set(ngx_feature "POSIX semaphores in libpthread")
     set(ngx_feature_libs "-lpthread")
-    ngx_check_feature()
+    ngx_auto_feature()
 
     if ("${ngx_found}" STREQUAL "yes")
         set(CORE_LIBS ${CORE_LIBS} "-lpthread")
@@ -1454,7 +1454,7 @@ set(ngx_feature_libs "")
 set(ngx_feature_test
     "struct msghdr  msg\;"
     "printf(\"%d\", (int) sizeof(msg.msg_control))")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "ioctl(FIONBIO)")
@@ -1467,7 +1467,7 @@ set(ngx_feature_incs
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "int i = FIONBIO\; printf(\"%d\", i)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "struct tm.tm_gmtoff")
@@ -1481,7 +1481,7 @@ set(ngx_feature_libs "")
 set(ngx_feature_test
     "struct tm  tm\; tm.tm_gmtoff = 0\;"
     "printf(\"%d\", (int) tm.tm_gmtoff)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "struct dirent.d_namlen")
@@ -1495,7 +1495,7 @@ set(ngx_feature_libs "")
 set(ngx_feature_test
     "struct dirent  dir\; dir.d_namlen = 0\;"
     "printf(\"%d\", (int) dir.d_namlen)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "struct dirent.d_type")
@@ -1509,7 +1509,7 @@ set(ngx_feature_libs "")
 set(ngx_feature_test
     "struct dirent  dir\; dir.d_type = DT_REG\;"
     "printf(\"%d\", (int) dir.d_type)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "sysconf(_SC_NPROCESSORS_ONLN)")
@@ -1519,7 +1519,7 @@ set(ngx_feature_incs "")
 set(ngx_feature_path "")
 set(ngx_feature_libs "")
 set(ngx_feature_test "sysconf(_SC_NPROCESSORS_ONLN)")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "openat(), fstatat()")
@@ -1535,7 +1535,7 @@ set(ngx_feature_test
     "struct stat sb\;"
     "openat(AT_FDCWD, \".\", O_RDONLY|O_NOFOLLOW)\;"
     "fstatat(AT_FDCWD, \".\", &sb, AT_SYMLINK_NOFOLLOW)\;")
-ngx_check_feature()
+ngx_auto_feature()
 
 
 set(ngx_feature "getaddrinfo()")
@@ -1551,12 +1551,12 @@ set(ngx_feature_test
     "struct addrinfo *res\;"
     "if (getaddrinfo(\"localhost\", NULL, NULL, &res) != 0) return 1\;"
     "freeaddrinfo(res)")
-ngx_check_feature()
+ngx_auto_feature()
 
 # ngx: auto/threads script
 
 if ("${USE_THREADS}" STREQUAL "YES")
-    ngx_have("NGX_THREADS")
+    ngx_auto_have("NGX_THREADS")
     set(CORE_SRCS ${CORE_SRCS} ${THREAD_POOL_SRCS})
     set(CORE_LIBS ${CORE_LIBS} "-lpthread")
 endif()
@@ -1568,7 +1568,7 @@ if ("${EVENT_SELECT}" STREQUAL "NO" AND "${EVENT_FOUND}" STREQUAL "NO")
 endif()
 
 if ("${EVENT_SELECT}" STREQUAL "YES")
-    ngx_have("NGX_HAVE_SELECT")
+    ngx_auto_have("NGX_HAVE_SELECT")
     set(CORE_SRCS ${CORE_SRCS} ${SELECT_SRCS})
     set(EVENT_MODULES ${EVENT_MODULES} ${SELECT_MODULE})
 endif()
@@ -1579,18 +1579,18 @@ if ("${EVENT_POLL}" STREQUAL "NO" AND "${EVENT_FOUND}" STREQUAL "NO")
 endif()
 
 if ("${EVENT_POLL}" STREQUAL "YES")
-    ngx_have("NGX_HAVE_POLL")
+    ngx_auto_have("NGX_HAVE_POLL")
     set(CORE_SRCS ${CORE_SRCS} ${POLL_SRCS})
     set(EVENT_MODULES ${EVENT_MODULES} ${POLL_MODULE})
 endif()
 
 
 if ("${NGX_TEST_BUILD_EPOLL}" STREQUAL "YES")
-    ngx_have("NGX_HAVE_EPOLL")
-    ngx_have("NGX_HAVE_EPOLLRDHUP")
-    ngx_have("NGX_HAVE_EPOLLEXCLUSIVE")
-    ngx_have("NGX_HAVE_EVENTFD")
-    ngx_have("NGX_TEST_BUILD_EPOLL")
+    ngx_auto_have("NGX_HAVE_EPOLL")
+    ngx_auto_have("NGX_HAVE_EPOLLRDHUP")
+    ngx_auto_have("NGX_HAVE_EPOLLEXCLUSIVE")
+    ngx_auto_have("NGX_HAVE_EVENTFD")
+    ngx_auto_have("NGX_TEST_BUILD_EPOLL")
     set(EVENT_MODULES ${EVENT_MODULES} ${EPOLL_MODULE})
     set(CORE_SRCS ${CORE_SRCS} ${EPOLL_SRCS})
 endif()
@@ -1600,7 +1600,7 @@ set(HTTP_MODULES "")
 set(HTTP_DEPS "")
 set(HTTP_INCS "")
 
-function(ngx_module)
+function(ngx_auto_module)
     set(ngx_var "${ngx_module_type}")
 
     if ("x${ngx_module_type}" MATCHES "^xHTTP_")
@@ -1724,7 +1724,7 @@ set(ngx_module_srcs
 )
 set(ngx_module_libs "")
 set(ngx_module_link "YES")
-ngx_module()
+ngx_auto_module()
 
 
 if (NOT "${HTTP}" STREQUAL "YES")
@@ -1734,7 +1734,7 @@ endif()
 
 
 if ("${HTTP_CACHE}" STREQUAL "YES")
-    ngx_have("NGX_HTTP_CACHE")
+    ngx_auto_have("NGX_HTTP_CACHE")
     set(HTTP_SRCS ${HTTP_SRCS} ${HTTP_FILE_CACHE_SRCS})
 endif()
 
@@ -1826,14 +1826,14 @@ set(ngx_module_name "ngx_http_write_filter_module")
 set(ngx_module_srcs "src/http/ngx_http_write_filter_module.c")
 set(ngx_module_libs "")
 set(ngx_module_link "YES")
-ngx_module()
+ngx_auto_module()
 
 
 set(ngx_module_name "ngx_http_header_filter_module")
 set(ngx_module_srcs "src/http/ngx_http_header_filter_module.c")
 set(ngx_module_libs "")
 set(ngx_module_link "YES")
-ngx_module()
+ngx_auto_module()
 
 
 set(ngx_module_name "ngx_http_chunked_filter_module")
@@ -1841,7 +1841,7 @@ set(ngx_module_srcs "src/http/modules/ngx_http_chunked_filter_module.c")
 set(ngx_module_libs "")
 set(ngx_module_link "YES")
 
-ngx_module()
+ngx_auto_module()
 
 
 if ("${HTTP_V2}" STREQUAL "YES")
@@ -1850,7 +1850,7 @@ if ("${HTTP_V2}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_V2}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if (TRUE)
@@ -1859,12 +1859,12 @@ if (TRUE)
     set(ngx_module_libs "")
     set(ngx_module_link "YES")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 
 if ("${HTTP_GZIP}" STREQUAL "YES")
-    ngx_have("NGX_HTTP_GZIP")
+    ngx_auto_have("NGX_HTTP_GZIP")
     set(USE_ZLIB "YES")
 
     set(ngx_module_name "ngx_http_gzip_filter_module")
@@ -1872,7 +1872,7 @@ if ("${HTTP_GZIP}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_GZIP}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_POSTPONE}" STREQUAL "YES")
@@ -1881,18 +1881,18 @@ if ("${HTTP_POSTPONE}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_POSTPONE}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_SSI}" STREQUAL "YES")
-    ngx_have("NGX_HTTP_SSI")
+    ngx_auto_have("NGX_HTTP_SSI")
 
     set(ngx_module_name "ngx_http_ssi_filter_module")
     set(ngx_module_srcs "src/http/modules/ngx_http_ssi_filter_module.c")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_SSI}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_CHARSET}" STREQUAL "YES")
@@ -1901,7 +1901,7 @@ if ("${HTTP_CHARSET}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_CHARSET}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if (NOT "${HTTP_XSLT}" STREQUAL "NO")
@@ -1910,7 +1910,7 @@ if (NOT "${HTTP_XSLT}" STREQUAL "NO")
     set(ngx_module_libs "LIBXSLT")
     set(ngx_module_link "${HTTP_XSLT}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if (NOT "${HTTP_IMAGE_FILTER}" STREQUAL "NO")
@@ -1919,7 +1919,7 @@ if (NOT "${HTTP_IMAGE_FILTER}" STREQUAL "NO")
     set(ngx_module_libs "LIBGD")
     set(ngx_module_link "${HTTP_IMAGE_FILTER}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_SUB}" STREQUAL "YES")
@@ -1928,7 +1928,7 @@ if ("${HTTP_SUB}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_SUB}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_ADDITION}" STREQUAL "YES")
@@ -1937,11 +1937,11 @@ if ("${HTTP_ADDITION}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_ADDITION}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_GUNZIP}" STREQUAL "YES")
-    ngx_have("NGX_HTTP_GZIP")
+    ngx_auto_have("NGX_HTTP_GZIP")
     set(USE_ZLIB "YES")
 
     set(ngx_module_name "ngx_http_gunzip_filter_module")
@@ -1949,7 +1949,7 @@ if ("${HTTP_GUNZIP}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_GUNZIP}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_USERID}" STREQUAL "YES")
@@ -1958,7 +1958,7 @@ if ("${HTTP_USERID}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_USERID}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if (TRUE)
@@ -1967,7 +1967,7 @@ if (TRUE)
     set(ngx_module_libs "")
     set(ngx_module_link "YES")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 
@@ -1980,7 +1980,7 @@ if (TRUE)
     set(ngx_module_libs "")
     set(ngx_module_link "YES")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if (TRUE)
@@ -1989,7 +1989,7 @@ if (TRUE)
     set(ngx_module_libs "")
     set(ngx_module_link "YES")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if (TRUE)
@@ -1998,7 +1998,7 @@ if (TRUE)
     set(ngx_module_libs "")
     set(ngx_module_link "YES")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_SLICE}" STREQUAL "YES")
@@ -2007,14 +2007,14 @@ if ("${HTTP_SLICE}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_SLICE}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 
 set(ngx_module_type "HTTP")
 
 if ("${HTTP_V2}" STREQUAL "YES")
-    ngx_have("NGX_HTTP_V2")
+    ngx_auto_have("NGX_HTTP_V2")
 
     set(ngx_module_name "ngx_http_v2_module")
     set(ngx_module_srcs
@@ -2026,7 +2026,7 @@ if ("${HTTP_V2}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_V2}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if (TRUE)
@@ -2035,29 +2035,29 @@ if (TRUE)
     set(ngx_module_libs "")
     set(ngx_module_link "YES")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_GZIP_STATIC}" STREQUAL "YES")
-    ngx_have("NGX_HTTP_GZIP")
+    ngx_auto_have("NGX_HTTP_GZIP")
 
     set(ngx_module_name "ngx_http_gzip_static_module")
     set(ngx_module_srcs "src/http/modules/ngx_http_gzip_static_module.c")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_GZIP_STATIC}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_DAV}" STREQUAL "YES")
-    ngx_have("NGX_HTTP_DAV")
+    ngx_auto_have("NGX_HTTP_DAV")
 
     set(ngx_module_name "ngx_http_dav_module")
     set(ngx_module_srcs "src/http/modules/ngx_http_dav_module.c")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_DAV}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_AUTOINDEX}" STREQUAL "YES")
@@ -2066,7 +2066,7 @@ if ("${HTTP_AUTOINDEX}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_AUTOINDEX}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if (TRUE)
@@ -2075,7 +2075,7 @@ if (TRUE)
     set(ngx_module_libs "")
     set(ngx_module_link "YES")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_RANDOM_INDEX}" STREQUAL "YES")
@@ -2084,7 +2084,7 @@ if ("${HTTP_RANDOM_INDEX}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_RANDOM_INDEX}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_AUTH_REQUEST}" STREQUAL "YES")
@@ -2093,18 +2093,18 @@ if ("${HTTP_AUTH_REQUEST}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_AUTH_REQUEST}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_AUTH_BASIC}" STREQUAL "YES")
-    ngx_have("NGX_CRYPT")
+    ngx_auto_have("NGX_CRYPT")
 
     set(ngx_module_name "ngx_http_auth_basic_module")
     set(ngx_module_srcs "src/http/modules/ngx_http_auth_basic_module.c")
     set(ngx_module_libs "${CRYPT_LIB}")
     set(ngx_module_link "${HTTP_AUTH_BASIC}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_ACCESS}" STREQUAL "YES")
@@ -2113,7 +2113,7 @@ if ("${HTTP_ACCESS}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_ACCESS}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_LIMIT_CONN}" STREQUAL "YES")
@@ -2122,7 +2122,7 @@ if ("${HTTP_LIMIT_CONN}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_LIMIT_CONN}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_LIMIT_REQ}" STREQUAL "YES")
@@ -2131,41 +2131,41 @@ if ("${HTTP_LIMIT_REQ}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_LIMIT_REQ}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_REALIP}" STREQUAL "YES")
-    ngx_have("NGX_HTTP_REALIP")
-    ngx_have("NGX_HTTP_X_FORWARDED_FOR")
+    ngx_auto_have("NGX_HTTP_REALIP")
+    ngx_auto_have("NGX_HTTP_X_FORWARDED_FOR")
 
     set(ngx_module_name "ngx_http_realip_module")
     set(ngx_module_srcs "src/http/modules/ngx_http_realip_module.c")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_REALIP}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_GEO}" STREQUAL "YES")
-    ngx_have("NGX_HTTP_X_FORWARDED_FOR")
+    ngx_auto_have("NGX_HTTP_X_FORWARDED_FOR")
 
     set(ngx_module_name "ngx_http_geo_module")
     set(ngx_module_srcs "src/http/modules/ngx_http_geo_module.c")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_GEO}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if (NOT "${HTTP_GEOIP}" STREQUAL "NO")
-    ngx_have("NGX_HTTP_X_FORWARDED_FOR")
+    ngx_auto_have("NGX_HTTP_X_FORWARDED_FOR")
 
     set(ngx_module_name "ngx_http_geoip_module")
     set(ngx_module_srcs "src/http/modules/ngx_http_geoip_module.c")
     set(ngx_module_libs "GEOIP")
     set(ngx_module_link "${HTTP_GEOIP}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_MAP}" STREQUAL "YES")
@@ -2174,7 +2174,7 @@ if ("${HTTP_MAP}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_MAP}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_SPLIT_CLIENTS}" STREQUAL "YES")
@@ -2183,7 +2183,7 @@ if ("${HTTP_SPLIT_CLIENTS}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_SPLIT_CLIENTS}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_REFERER}" STREQUAL "YES")
@@ -2192,7 +2192,7 @@ if ("${HTTP_REFERER}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_REFERER}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_REWRITE}" STREQUAL "YES" AND NOT "${USE_PCRE}" STREQUAL "DISABLED")
@@ -2203,30 +2203,30 @@ if ("${HTTP_REWRITE}" STREQUAL "YES" AND NOT "${USE_PCRE}" STREQUAL "DISABLED")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_REWRITE}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_SSL}" STREQUAL "YES")
     set(USE_OPENSSL "YES")
-    ngx_have("NGX_HTTP_SSL")
+    ngx_auto_have("NGX_HTTP_SSL")
 
     set(ngx_module_name "ngx_http_ssl_module")
     set(ngx_module_srcs "src/http/modules/ngx_http_ssl_module.c")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_SSL}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_PROXY}" STREQUAL "YES")
-    ngx_have("NGX_HTTP_X_FORWARDED_FOR")
+    ngx_auto_have("NGX_HTTP_X_FORWARDED_FOR")
 
     set(ngx_module_name "ngx_http_proxy_module")
     set(ngx_module_srcs "src/http/modules/ngx_http_proxy_module.c")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_PROXY}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_FASTCGI}" STREQUAL "YES")
@@ -2235,7 +2235,7 @@ if ("${HTTP_FASTCGI}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_FASTCGI}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_UWSGI}" STREQUAL "YES")
@@ -2244,7 +2244,7 @@ if ("${HTTP_UWSGI}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_UWSGI}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_SCGI}" STREQUAL "YES")
@@ -2253,7 +2253,7 @@ if ("${HTTP_SCGI}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_SCGI}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if (NOT "${HTTP_PERL}" STREQUAL "NO")
@@ -2262,7 +2262,7 @@ if (NOT "${HTTP_PERL}" STREQUAL "NO")
     set(ngx_module_libs "PERL")
     set(ngx_module_link "${HTTP_PERL}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_MEMCACHED}" STREQUAL "YES")
@@ -2271,7 +2271,7 @@ if ("${HTTP_MEMCACHED}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_MEMCACHED}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_EMPTY_GIF}" STREQUAL "YES")
@@ -2280,7 +2280,7 @@ if ("${HTTP_EMPTY_GIF}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_EMPTY_GIF}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_BROWSER}" STREQUAL "YES")
@@ -2289,7 +2289,7 @@ if ("${HTTP_BROWSER}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_BROWSER}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_SECURE_LINK}" STREQUAL "YES")
@@ -2298,18 +2298,18 @@ if ("${HTTP_SECURE_LINK}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_SECURE_LINK}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_DEGRADATION}" STREQUAL "YES")
-    ngx_have("NGX_HTTP_DEGRADATION")
+    ngx_auto_have("NGX_HTTP_DEGRADATION")
 
     set(ngx_module_name "ngx_http_degradation_module")
     set(ngx_module_srcs "src/http/modules/ngx_http_degradation_module.c")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_DEGRADATION}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_FLV}" STREQUAL "YES")
@@ -2318,7 +2318,7 @@ if ("${HTTP_FLV}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_FLV}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_MP4}" STREQUAL "YES")
@@ -2327,7 +2327,7 @@ if ("${HTTP_MP4}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_MP4}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_UPSTREAM_HASH}" STREQUAL "YES")
@@ -2336,7 +2336,7 @@ if ("${HTTP_UPSTREAM_HASH}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_UPSTREAM_HASH}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_UPSTREAM_IP_HASH}" STREQUAL "YES")
@@ -2345,7 +2345,7 @@ if ("${HTTP_UPSTREAM_IP_HASH}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_UPSTREAM_IP_HASH}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_UPSTREAM_LEAST_CONN}" STREQUAL "YES")
@@ -2354,7 +2354,7 @@ if ("${HTTP_UPSTREAM_LEAST_CONN}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_UPSTREAM_LEAST_CONN}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_UPSTREAM_KEEPALIVE}" STREQUAL "YES")
@@ -2363,29 +2363,29 @@ if ("${HTTP_UPSTREAM_KEEPALIVE}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_UPSTREAM_KEEPALIVE}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_UPSTREAM_ZONE}" STREQUAL "YES")
-    ngx_have("NGX_HTTP_UPSTREAM_ZONE")
+    ngx_auto_have("NGX_HTTP_UPSTREAM_ZONE")
 
     set(ngx_module_name "ngx_http_upstream_zone_module")
     set(ngx_module_srcs "src/http/modules/ngx_http_upstream_zone_module.c")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_UPSTREAM_ZONE}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${HTTP_STUB_STATUS}" STREQUAL "YES")
-    ngx_have("NGX_STAT_STUB")
+    ngx_auto_have("NGX_STAT_STUB")
 
     set(ngx_module_name "ngx_http_stub_status_module")
     set(ngx_module_srcs "src/http/modules/ngx_http_stub_status_module.c")
     set(ngx_module_libs "")
     set(ngx_module_link "${HTTP_STUB_STATUS}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 
@@ -2407,17 +2407,17 @@ if (NOT "${MAIL}" STREQUAL "NO")
         "src/mail/ngx_mail_handler.c"
         "src/mail/ngx_mail_parse.c")
 
-    ngx_module()
+    ngx_auto_module()
 
 
     if ("${MAIL_SSL}" STREQUAL "YES")
         set(USE_OPENSSL "YES")
-        ngx_have("NGX_MAIL_SSL")
+        ngx_auto_have("NGX_MAIL_SSL")
 
         set(ngx_module_name "ngx_mail_ssl_module")
         set(ngx_module_srcs "src/mail/ngx_mail_ssl_module.c")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 
     if ("${MAIL_POP3}" STREQUAL "YES")
@@ -2426,7 +2426,7 @@ if (NOT "${MAIL}" STREQUAL "NO")
             "src/mail/ngx_mail_pop3_module.c"
             "src/mail/ngx_mail_pop3_handler.c")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 
     if ("${MAIL_IMAP}" STREQUAL "YES")
@@ -2435,7 +2435,7 @@ if (NOT "${MAIL}" STREQUAL "NO")
             "src/mail/ngx_mail_imap_module.c"
             "src/mail/ngx_mail_imap_handler.c")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 
     if ("${MAIL_SMTP}" STREQUAL "YES")
@@ -2444,18 +2444,18 @@ if (NOT "${MAIL}" STREQUAL "NO")
             "src/mail/ngx_mail_smtp_module.c"
             "src/mail/ngx_mail_smtp_handler.c")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 
     set(ngx_module_name "ngx_mail_auth_http_module")
     set(ngx_module_srcs "src/mail/ngx_mail_auth_http_module.c")
 
-    ngx_module()
+    ngx_auto_module()
 
     set(ngx_module_name "ngx_mail_proxy_module")
     set(ngx_module_srcs "src/mail/ngx_mail_proxy_module.c")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 
@@ -2487,19 +2487,19 @@ if (NOT "${STREAM}" STREQUAL "NO")
         src/stream/ngx_stream_upstream_round_robin.c
         src/stream/ngx_stream_write_filter_module.c)
 
-    ngx_module()
+    ngx_auto_module()
 
 
     if ("${STREAM_SSL}" STREQUAL "YES")
         set(USE_OPENSSL "YES")
-        ngx_have("NGX_STREAM_SSL")
+        ngx_auto_have("NGX_STREAM_SSL")
 
         set(ngx_module_name "ngx_stream_ssl_module")
         set(ngx_module_srcs "src/stream/ngx_stream_ssl_module.c")
         set(ngx_module_libs "")
         set(ngx_module_link "${STREAM_SSL}")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 
     if ("${STREAM_REALIP}" STREQUAL "YES")
@@ -2508,7 +2508,7 @@ if (NOT "${STREAM}" STREQUAL "NO")
         set(ngx_module_libs "")
         set(ngx_module_link "${STREAM_REALIP}")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 
     if ("${STREAM_LIMIT_CONN}" STREQUAL "YES")
@@ -2517,7 +2517,7 @@ if (NOT "${STREAM}" STREQUAL "NO")
         set(ngx_module_libs "")
         set(ngx_module_link "${STREAM_LIMIT_CONN}")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 
     if ("${STREAM_ACCESS}" STREQUAL "YES")
@@ -2526,7 +2526,7 @@ if (NOT "${STREAM}" STREQUAL "NO")
         set(ngx_module_libs "")
         set(ngx_module_link "${STREAM_ACCESS}")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 
     if ("${STREAM_GEO}" STREQUAL "YES")
@@ -2535,7 +2535,7 @@ if (NOT "${STREAM}" STREQUAL "NO")
         set(ngx_module_libs "")
         set(ngx_module_link "${STREAM_GEO}")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 
     if (NOT "${STREAM_GEOIP}" STREQUAL "NO")
@@ -2544,7 +2544,7 @@ if (NOT "${STREAM}" STREQUAL "NO")
         set(ngx_module_libs "GEOIP")
         set(ngx_module_link "${STREAM_GEOIP}")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 
     if ("${STREAM_MAP}" STREQUAL "YES")
@@ -2553,7 +2553,7 @@ if (NOT "${STREAM}" STREQUAL "NO")
         set(ngx_module_libs "")
         set(ngx_module_link "${STREAM_MAP}")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 
     if ("${STREAM_SPLIT_CLIENTS}" STREQUAL "YES")
@@ -2562,7 +2562,7 @@ if (NOT "${STREAM}" STREQUAL "NO")
         set(ngx_module_libs "")
         set(ngx_module_link "${STREAM_SPLIT_CLIENTS}")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 
     if ("${STREAM_RETURN}" STREQUAL "YES")
@@ -2571,7 +2571,7 @@ if (NOT "${STREAM}" STREQUAL "NO")
         set(ngx_module_libs "")
         set(ngx_module_link "${STREAM_RETURN}")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 
     if ("${STREAM_UPSTREAM_HASH}" STREQUAL "YES")
@@ -2580,7 +2580,7 @@ if (NOT "${STREAM}" STREQUAL "NO")
         set(ngx_module_libs "")
         set(ngx_module_link "${STREAM_UPSTREAM_HASH}")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 
     if ("${STREAM_UPSTREAM_LEAST_CONN}" STREQUAL "YES")
@@ -2589,18 +2589,18 @@ if (NOT "${STREAM}" STREQUAL "NO")
         set(ngx_module_libs "")
         set(ngx_module_link "${STREAM_UPSTREAM_LEAST_CONN}")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 
     if ("${STREAM_UPSTREAM_ZONE}" STREQUAL "YES")
-        ngx_have("NGX_STREAM_UPSTREAM_ZONE")
+        ngx_auto_have("NGX_STREAM_UPSTREAM_ZONE")
 
         set(ngx_module_name "ngx_stream_upstream_zone_module")
         set(ngx_module_srcs "src/stream/ngx_stream_upstream_zone_module.c")
         set(ngx_module_libs "")
         set(ngx_module_link "${STREAM_UPSTREAM_ZONE}")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 
     if ("${STREAM_SSL_PREREAD}" STREQUAL "YES")
@@ -2609,7 +2609,7 @@ if (NOT "${STREAM}" STREQUAL "NO")
         set(ngx_module_libs "")
         set(ngx_module_link "${STREAM_SSL_PREREAD}")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 endif()
 
@@ -2624,7 +2624,7 @@ foreach (addon_name ${NGX_ADDONS})
     set(ngx_module_order "")
     set(ngx_module_link "ADDON")
 
-    ngx_module()
+    ngx_auto_module()
 
 endforeach()
 
@@ -2639,7 +2639,7 @@ foreach (addon_name ${NGX_DYNAMIC_ADDONS})
     set(ngx_module_order "")
     set(ngx_module_link "DYNAMIC")
 
-    ngx_module()
+    ngx_auto_module()
 
 endforeach()
 
@@ -2654,7 +2654,7 @@ if ("${USE_OPENSSL}" STREQUAL "YES")
     set(ngx_module_link "YES")
     set(ngx_module_order "")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 
@@ -2666,7 +2666,7 @@ if ("${USE_PCRE}" STREQUAL "YES")
     set(ngx_module_link "YES")
     set(ngx_module_order "")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 
@@ -2695,7 +2695,7 @@ if (NOT "${MAIL}" STREQUAL "NO")
         set(ngx_module_libs "")
         set(ngx_module_link "DYNAMIC")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 endif()
 
@@ -2711,7 +2711,7 @@ if (NOT "${STREAM}" STREQUAL "NO")
         set(ngx_module_libs "")
         set(ngx_module_link "DYNAMIC")
 
-        ngx_module()
+        ngx_auto_module()
     endif()
 endif()
 
@@ -2725,7 +2725,7 @@ if ("${NGX_GOOGLE_PERFTOOLS}" STREQUAL "YES")
     set(ngx_module_libs "")
     set(ngx_module_link "${NGX_GOOGLE_PERFTOOLS}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 if ("${NGX_CPP_TEST}" STREQUAL "YES")
@@ -2734,20 +2734,20 @@ if ("${NGX_CPP_TEST}" STREQUAL "YES")
     set(ngx_module_libs "-lstdc++")
     set(ngx_module_link "${NGX_CPP_TEST}")
 
-    ngx_module()
+    ngx_auto_module()
 endif()
 
 set(modules ${modules} ${MISC_MODULES})
 
 if ("${NGX_COMPAT}" STREQUAL "YES")
-    ngx_have("NGX_COMPAT")
-    ngx_have("NGX_HTTP_GZIP")
-    ngx_have("NGX_HTTP_DAV")
-    ngx_have("NGX_HTTP_REALIP")
-    ngx_have("NGX_HTTP_X_FORWARDED_FOR")
-    ngx_have("NGX_HTTP_HEADERS")
-    ngx_have("NGX_HTTP_UPSTREAM_ZONE")
-    ngx_have("NGX_STREAM_UPSTREAM_ZONE")
+    ngx_auto_have("NGX_COMPAT")
+    ngx_auto_have("NGX_HTTP_GZIP")
+    ngx_auto_have("NGX_HTTP_DAV")
+    ngx_auto_have("NGX_HTTP_REALIP")
+    ngx_auto_have("NGX_HTTP_X_FORWARDED_FOR")
+    ngx_auto_have("NGX_HTTP_HEADERS")
+    ngx_auto_have("NGX_HTTP_UPSTREAM_ZONE")
+    ngx_auto_have("NGX_STREAM_UPSTREAM_ZONE")
 endif()
 
 
@@ -2792,7 +2792,7 @@ append_modules_c("\n")
 
 if ("${USE_PCRE}" STREQUAL "YES")
     list(APPEND REQ_LIB_LIST libpcre)
-    ngx_have("NGX_PCRE")
+    ngx_auto_have("NGX_PCRE")
 
     set(ngx_feature "PCRE JIT support")
     set(ngx_feature_name "NGX_HAVE_PCRE_JIT")
@@ -2805,7 +2805,7 @@ if ("${USE_PCRE}" STREQUAL "YES")
         "pcre_free_study(NULL)\;"
         "pcre_config(PCRE_CONFIG_JIT, &jit)\;"
         "if (jit != 1) return 1\;")
-    ngx_check_feature()
+    ngx_auto_feature()
 
 else()
     if ("${USE_PCRE}" STREQUAL "DISABLED" AND "${HTTP_REWRITE}" STREQUAL "YES")
@@ -2815,13 +2815,13 @@ endif()
 
 if ("${USE_OPENSSL}" STREQUAL "YES")
     list(APPEND REQ_LIB_LIST libssl libcrypto)
-    ngx_have("NGX_SSL")
-    ngx_have("NGX_OPENSSL")
+    ngx_auto_have("NGX_SSL")
+    ngx_auto_have("NGX_OPENSSL")
 endif()
 
 if ("${USE_ZLIB}" STREQUAL "YES")
     list(APPEND REQ_LIB_LIST zlib)
-    ngx_have("NGX_ZLIB")
+    ngx_auto_have("NGX_ZLIB")
 endif()
 
 if (NOT "${USE_LIBXSLT}" STREQUAL "NO")
@@ -2834,7 +2834,7 @@ if (NOT "${USE_LIBXSLT}" STREQUAL "NO")
     set(ngx_feature_path "/usr/include/libxml2")
     set(ngx_feature_libs "-lexslt")
     set(ngx_feature_test "exsltRegisterAll()\;")
-    ngx_check_feature()
+    ngx_auto_feature()
 endif()
 
 if (NOT "${USE_LIBGD}" STREQUAL "NO")
@@ -2843,7 +2843,7 @@ if (NOT "${USE_LIBGD}" STREQUAL "NO")
     set(ngx_feature "GD WebP support")
     set(ngx_feature_name "NGX_HAVE_GD_WEBP")
     set(ngx_feature_test "gdImagePtr img = gdImageCreateFromWebpPtr(1, NULL)\;")
-    ngx_check_feature()
+    ngx_auto_feature()
 endif()
 
 if (NOT "${USE_PERL}" STREQUAL "NO")
@@ -2862,7 +2862,7 @@ if (NOT "${USE_GEOIP}" STREQUAL "NO")
     set(ngx_feature_path "")
     set(ngx_feature_libs "")
     set(ngx_feature_test "printf(\"%d\", GEOIP_CITY_EDITION_REV0_V6)\;")
-    ngx_check_feature()
+    ngx_auto_feature()
 endif()
 
 if ("${NGX_GOOGLE_PERFTOOLS}" STREQUAL "YES")
@@ -2889,7 +2889,7 @@ if (NOT "${NGX_LIBATOMIC}" STREQUAL "NO")
         "if (n != 2)"
         "    return 1\;"
         "AO_nop()\;")
-    ngx_check_feature()
+    ngx_auto_feature()
 endif()
 
 find_package(PkgConfig REQUIRED)
@@ -2900,21 +2900,21 @@ link_directories(${REQ_LIBRARY_DIRS})
 
 # ngx: back to configure script
 
-ngx_define("NGX_PREFIX"         "\"${NGX_PREFIX}/\"")
-ngx_define("NGX_CONF_PREFIX"    "\"${NGX_CONF_PREFIX}/\"")
+ngx_auto_define("NGX_PREFIX"         "\"${NGX_PREFIX}/\"")
+ngx_auto_define("NGX_CONF_PREFIX"    "\"${NGX_CONF_PREFIX}/\"")
 
-ngx_define("NGX_SBIN_PATH"      "\"${NGX_SBIN_PATH}\"")
-ngx_define("NGX_CONF_PATH"      "\"${NGX_CONF_PATH}\"")
-ngx_define("NGX_PID_PATH"       "\"${NGX_PID_PATH}\"")
-ngx_define("NGX_LOCK_PATH"      "\"${NGX_LOCK_PATH}\"")
-ngx_define("NGX_ERROR_LOG_PATH" "\"${NGX_ERROR_LOG_PATH}\"")
+ngx_auto_define("NGX_SBIN_PATH"      "\"${NGX_SBIN_PATH}\"")
+ngx_auto_define("NGX_CONF_PATH"      "\"${NGX_CONF_PATH}\"")
+ngx_auto_define("NGX_PID_PATH"       "\"${NGX_PID_PATH}\"")
+ngx_auto_define("NGX_LOCK_PATH"      "\"${NGX_LOCK_PATH}\"")
+ngx_auto_define("NGX_ERROR_LOG_PATH" "\"${NGX_ERROR_LOG_PATH}\"")
 
-ngx_define("NGX_HTTP_LOG_PATH"          "\"${NGX_HTTP_LOG_PATH}\"")
-ngx_define("NGX_HTTP_CLIENT_TEMP_PATH"  "\"${NGX_HTTP_CLIENT_TEMP_PATH}\"")
-ngx_define("NGX_HTTP_PROXY_TEMP_PATH"   "\"${NGX_HTTP_PROXY_TEMP_PATH}\"")
-ngx_define("NGX_HTTP_FASTCGI_TEMP_PATH" "\"${NGX_HTTP_FASTCGI_TEMP_PATH}\"")
-ngx_define("NGX_HTTP_UWSGI_TEMP_PATH"   "\"${NGX_HTTP_UWSGI_TEMP_PATH}\"")
-ngx_define("NGX_HTTP_SCGI_TEMP_PATH"    "\"${NGX_HTTP_SCGI_TEMP_PATH}\"")
+ngx_auto_define("NGX_HTTP_LOG_PATH"          "\"${NGX_HTTP_LOG_PATH}\"")
+ngx_auto_define("NGX_HTTP_CLIENT_TEMP_PATH"  "\"${NGX_HTTP_CLIENT_TEMP_PATH}\"")
+ngx_auto_define("NGX_HTTP_PROXY_TEMP_PATH"   "\"${NGX_HTTP_PROXY_TEMP_PATH}\"")
+ngx_auto_define("NGX_HTTP_FASTCGI_TEMP_PATH" "\"${NGX_HTTP_FASTCGI_TEMP_PATH}\"")
+ngx_auto_define("NGX_HTTP_UWSGI_TEMP_PATH"   "\"${NGX_HTTP_UWSGI_TEMP_PATH}\"")
+ngx_auto_define("NGX_HTTP_SCGI_TEMP_PATH"    "\"${NGX_HTTP_SCGI_TEMP_PATH}\"")
 
 # ngx: auto/make script
 
@@ -2966,16 +2966,16 @@ target_link_libraries(nginx
 
 # ngx: auto/stubs script
 
-ngx_have("NGX_SUPPRESS_WARN")
-ngx_have("NGX_SMP")
+ngx_auto_have("NGX_SUPPRESS_WARN")
+ngx_auto_have("NGX_SMP")
 
 # ngx: back to configure script
 
-ngx_define("NGX_USER" "\"${NGX_USER}\"")
-ngx_define("NGX_GROUP" "\"${NGX_GROUP}\"")
+ngx_auto_define("NGX_USER" "\"${NGX_USER}\"")
+ngx_auto_define("NGX_GROUP" "\"${NGX_GROUP}\"")
 
 if (NOT "x${NGX_BUILD}" STREQUAL "x")
-    ngx_define("NGX_BUILD" "\"${NGX_BUILD}\"")
+    ngx_auto_define("NGX_BUILD" "\"${NGX_BUILD}\"")
 endif()
 
 # installation
