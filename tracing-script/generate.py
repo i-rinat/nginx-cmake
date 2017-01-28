@@ -65,6 +65,26 @@
 #
 # Presense of files named "*_module_modules.c" depends whenever you are using
 # dynamic modules.
+#
+# Generated CMakeLists.txt loads file PreLists.txt at the beginning and file
+# PostLists.txt at the end. Both of them are optional. You may to want, for
+# example, add
+#
+#   add_definitions(-DNGX_PREFIX="${CMAKE_INSTALL_PREFIX}/")
+#
+# to the PreLists.txt to change NGX_PREFIX which was remembered during
+# configuration step. PostLists.txt is the right place for linking nginx binary
+# with a your custom statically linked module, and so on.
+#
+# There is also BINARY_PREFIX internal variable which could be used to change
+# "nginx" binary name. Setting it to "custom-" will change binary name to
+# "custom-nginx".
+#
+# If you have static module for nginx, you need placeholders in module lists in
+# ngx_modules.c. There is a helper stub module, in "custom_module_stub"
+# directory. Change names there to those you use, and then add it via
+# "--add-module" configuration parameter.
+#
 # ---
 
 import os
