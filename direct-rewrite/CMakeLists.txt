@@ -262,6 +262,14 @@ function(ngx_auto_have option_name)
     file(APPEND "${NGX_AUTO_CONFIG_H_NAME}" "${A}")
 endfunction()
 
+function(ngx_auto_nohave option_name)
+    set(A "\n")
+    set(A "${A}#ifndef ${option_name}\n")
+    set(A "${A}#define ${option_name}  0\n")
+    set(A "${A}#endif\n\n")
+    file(APPEND "${NGX_AUTO_CONFIG_H_NAME}" "${A}")
+endfunction()
+
 function(ngx_auto_define option_name option_value)
     set(A "\n")
     set(A "${A}#ifndef ${option_name}\n")
@@ -553,7 +561,7 @@ set(CORE_SRCS ${UNIX_SRCS} ${LINUX_SRCS})
 
 # posix_fadvise64() had been implemented in 2.5.60
 if ("${NGX_RELEASE}" VERSION_LESS "2.5.60")
-    ngx_nohave("NGX_HAVE_POSIX_FADVISE")
+    ngx_auto_nohave("NGX_HAVE_POSIX_FADVISE")
 endif()
 
 # epoll, EPOLLET version
@@ -1728,7 +1736,7 @@ ngx_auto_module()
 
 
 if (NOT "${HTTP}" STREQUAL "YES")
-    ngx_nohave("NGX_CRYPT")
+    ngx_auto_nohave("NGX_CRYPT")
     set(CRYPT_LIB "")
 endif()
 
