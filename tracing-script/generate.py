@@ -148,6 +148,9 @@ subprocess.Popen(['make', '-j1'], env=env).wait()
 # Copy generated sources.
 subprocess.call(['cp objs/*.c objs/*.h "{}"'.format(outdir_objs)], shell=True)
 
+# use soft link to avoid multiple copies of the same sources
+subprocess.call(['ln -s {}/src/ "{}/src"'.format(os.getcwd(),outdir)], shell=True)
+
 # Process build log.
 with open(workdir_build_log) as f:
     lines = f.readlines()
@@ -169,6 +172,9 @@ target_shared_objects = set()
 
 # Maps object to a set of files it was created from.
 target_objects = dict()
+
+# Add other Definitions
+other_target_definitions = set()
 
 want_fPIC = False
 
@@ -229,6 +235,14 @@ for line in lines:
                 # Compilation output.
                 output_name = line.pop(0)
 
+            elif item[:2] == '-D':
+                other_target_definitions.add(item[2:])
+
+            elif item[:1] == '/' and item[-2:] == '.a':
+                # static libraries to link with
+                # use absolute path to avoid unexpected errors
+                libraries.add(item)
+
             elif item[:2] == '-l':
                 # Library to link with
                 libraries.add(item)
@@ -268,6 +282,10 @@ cmakelists_txt += "include(PreLists.txt OPTIONAL)\n\n"
 
 if want_fPIC:
     cmakelists_txt += "add_definitions(-fPIC)\n"
+
+# other definitions
+for item in other_target_definitions:
+    cmakelists_txt += 'add_definitions(' + item + ')\n'
 
 cmakelists_txt += "\n# warning flags: " + " ".join(warning_flags) + "\n\n"
 
