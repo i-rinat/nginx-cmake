@@ -170,6 +170,9 @@ target_shared_objects = set()
 # Maps object to a set of files it was created from.
 target_objects = dict()
 
+# Additional compiler definitions.
+target_definitions = set()
+
 want_fPIC = False
 
 for line in lines:
@@ -229,8 +232,15 @@ for line in lines:
                 # Compilation output.
                 output_name = line.pop(0)
 
+            elif item[:2] == '-D':
+                target_definitions.add(item[2:])
+
             elif item[:2] == '-l':
-                # Library to link with
+                # Dynamic libraries.
+                libraries.add(item)
+
+            elif item[-2:] == '.a':
+                # Static libraries.
                 libraries.add(item)
 
             elif item == '-fPIC':
@@ -269,6 +279,10 @@ cmakelists_txt += "include(PreLists.txt OPTIONAL)\n\n"
 
 if want_fPIC:
     cmakelists_txt += "add_definitions(-fPIC)\n"
+
+# Additional compiler definitions.
+for item in target_definitions:
+    cmakelists_txt += 'add_definitions(' + item + ')\n'
 
 cmakelists_txt += "\n# warning flags: " + " ".join(warning_flags) + "\n\n"
 
