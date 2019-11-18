@@ -239,7 +239,8 @@ for line in lines:
             elif item == '-shared':
                 # This line generates shared library
                 output_type = "shared"
-
+            elif item[:2] == '-L':
+                print("Skip item '" + item + "' due exact libs already linked")
             else:
                 source_files.add(item)
 
