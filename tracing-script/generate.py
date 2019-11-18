@@ -249,8 +249,13 @@ for line in lines:
             elif item == '-shared':
                 # This line generates shared library
                 output_type = "shared"
+
             elif item[:2] == '-L':
-                print("Skip item '" + item + "' due exact libs already linked")
+                # Libraries path. Usual libraries are expected at standard
+                # paths, so this is something custom. Let's avoid putting those
+                # into CMake directives here. Those can be added manually.
+                pass
+
             else:
                 source_files.add(item)
 
