@@ -340,6 +340,6 @@ cmakelists_txt += process_targets(target_shared_objects, 'add_library',
 cmakelists_txt += "include(PostLists.txt OPTIONAL)\n\n"
 
 with open(os.path.join(outdir, 'CMakeLists.txt'), 'wb') as f:
-    f.write(cmakelists_txt)
+    f.write(cmakelists_txt.encode('UTF-8'))
 
 print("done")
