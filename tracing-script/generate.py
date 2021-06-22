@@ -139,7 +139,7 @@ env['CXX'] = workdir_record_cplusplus
 
 # Call configure script.
 env['TRACE_LOG'] = workdir_configure_log
-subprocess.Popen(['./configure'] + sys.argv[1:], env=env).wait()
+subprocess.Popen(['/bin/sh', './configure'] + sys.argv[1:], env=env).wait()
 
 # Call make.
 env['TRACE_LOG'] = workdir_build_log
